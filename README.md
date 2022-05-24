@@ -25,7 +25,16 @@ The changes I made to the above template for my own use include:
  - Editing the information extracted from the API JSON response.
 
 ```
-jQuery.get('https://api.geocod.io/v1.7/geocode?q='+ encodeURIComponent(myInput.value) +'&api_key=' + encodeURIComponent('apiKey') + '&fields=cd,', function(response) {  
+// This is the API call itself
+        function geocodio() {
+            
+            //If the box is blank, then the user is prompted to add more
+            if(myInput.value.length == 0) {
+                alert("Please input a valid address")
+            }
+            //If the box isn't empty, execute the API call
+            else {
+                jQuery.get('https://api.geocod.io/v1.7/geocode?q='+ encodeURIComponent(myInput.value) +'&api_key=' + encodeURIComponent([API_KEY]) + '&fields=cd,', function(response) {  
                         console.log(response.results)
 ```
 
