@@ -3,7 +3,7 @@
 ## Purpose
 I was encharged with giving clients who had access to this webpage the ability to find their members of Congress based on their physical address. This is so that members could know their members' name, party, office address, office phone number, and other sources of information that they require to know them better.
 
-## Code Used
+## Coding Process
 The code I used was implanted into a WordPress webpage where I utilized Elementor to write blocks of code that could be integrated into the website with ease. The language used was HTML where I also utilized CSS and JavaScript. The main script the page relies upon is [Geocodio API](https://www.geocod.io/) where I pulled information from the JSON response from the following client-side access script template:
 
 ```
@@ -106,5 +106,10 @@ function execute() {
             .then(function(response) {
             },function(err) { console.error("Execute error", err);
     });
-}   
+};   
 ```
+After both of the scripts were set up, I looked through the repsonse body to find which pieces of information I needed to extract and assigned them to variables that would be displayed within the table. The information displayed varies from source because one API could grab more accurate information than the other. 
+
+An example is the address components that are both sources grab the client's inputted address, but Google's API is better at pinpointing the client's location even if a city or zipcode are left out of the input. Another example is that Google API offers photos of various representatives and senators, but I thought Geocodio offering the members' ```bioguide_id``` in conjunction with [theunitedstates.io's](https://github.com/unitedstates/images) library yielded much better photos.
+
+In short, both sources offer great information, so I picked and choose whichever I believed gave better results.
