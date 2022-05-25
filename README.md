@@ -113,3 +113,13 @@ After both of the scripts were set up, I looked through the repsonse body to fin
 An example is the address components that are both sources grab the client's inputted address, but Google's API is better at pinpointing the client's location even if a city or zipcode are left out of the input. Another example is that Google API offers photos of various representatives and senators, but I thought Geocodio offering the members' ```bioguide_id``` in conjunction with [theunitedstates.io's](https://github.com/unitedstates/images) library yielded much better photos.
 
 In short, both sources offer great information, so I picked and choose whichever I believed gave better results.
+
+The final product is as follows:
+
+![Starting_Look_For_FYCP](https://user-images.githubusercontent.com/46951897/170280262-f8f60c2b-d03b-401b-a059-cfe2f1806db2.png)
+
+User's input their address and must include their city or zip code, but a full address will make help improve the results. Then, they click "Search Now" when they are ready. For this example, we will use the Texas State Capitol.
+
+![Final_Results_FYCP](https://user-images.githubusercontent.com/46951897/170281322-d28a733b-e8d8-46b0-8eab-4823fa703d0a.png)
+
+
