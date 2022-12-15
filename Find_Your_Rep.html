@@ -1,18 +1,15 @@
 <head>
+    <base target="_blank">
     <script src="jQuery.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" media="print" href="print.css">
     <style>
-      .five.columns {
-         display: none;
-      }
      .fa {
-       padding: 20px;
+       padding: 10px;
        font-size: 30px;
        width: 60px;
        text-align: center;
-       text-decoration: none;
-       margin: 5px 2px;
       }
       .fa:hover {
        opacity: 0.7;
@@ -29,14 +26,17 @@
         color: white;   
         background: #c4302b;    
       }  
-      .article {
-        width: 150%
+      .fa.fa-envelope {   
+        color: white;   
+        background: #dd4b39;    
       }
       .apiBody {
         display: none;
+        color: black;
       }
       .apiTable {
         overflow-x: auto;
+        color: black;
       }
       .apiTable thead th {
         position: sticky;
@@ -48,8 +48,14 @@
       }
       .apiTable th, td {
         padding: 8px 16px;
-        border: 1px solid #ccc;
+        border: 2px solid #ccc;
+        color: black;
       }
+      
+      a {
+          rel: noopener;
+      }
+      
       .apiTable th {
         background: lightblue;
         font-weight: bold;
@@ -73,16 +79,85 @@
       .member-social-media a {
           margin-left:35px;
       }
+      @media print {
+          /* Hide all other elements */
+          .elementor-9329 {
+              display: none;
+          }
+          .elementor-location-footer {
+              display: none;
+          }
+          body * {
+              visibility: hidden;
+          }
+          /* Display print container elements */
+          .print-container, .print-container * {
+              visibility: visible;
+          }
+          print-container {
+            position: absolute;
+            left: 0px;
+            top: 0px
+          }
+          href {
+             display: none;
+          }
+          body, html {
+            margin-top:0px;
+            padding-top:0px;
+          }
+          a[href]:after {
+            content: none !important;
+          }
+          .page-break-before {
+              page-break-before: always;
+          }
+          .apro-logo {
+              height: 100%;
+          }
+          .input-body {
+              display: none;
+          }
+      }
+      
     </style>
 </head>
 <body onload="loadClient()">
-    <p>To find your members of Congress, type your address below. <br>For best results, include your street address,  city, state, and zip code!</p>
-    <input type="text" id="myTxt" style="width: 400px;" placeholder="Type Your Address Here!">
-    <input type="submit" id="myBtn" value="Search Now!">
+    <div class="print-container">
+        <img src="https://www.rtohq.org/wp-content/uploads/2016/04/Leg_Conf_2017_2.png" alt="APRO Legislative Conference Logo">
+    </div>
+    <div id="inputBody" class="input-body" style="color:black">
+        <p>To find your members of Congress, type your address below. <br>
+        In order to obtain the best results, you must fill out as many fields as possible.</p>
+        <div>
+            <label for="myAddress1">Street Address 1:</label><br>
+            <input type="text" id="myAddress1" style="width: 400px;" placeholder="1600 Pennsylvania Ave"><br>
+        </div>
+        <label for="myAddress2">Street Address 2:</label><br>
+        <input type="text" id="myAddress2" style="width: 400px;" placeholder="NW"><br>
+        
+        <label for="myCity">City:</label><br>
+        <input type="text" id="myCity" style="width: 400px;" placeholder="City"><br>
+        
+        <label for="myState">State/Province:</label><br>
+        <input type="text" id="myState" style="width: 400px;" placeholder="Washington, D.C."><br>
+        
+        <label for="myZip">Zip Code:</label><br>
+        <input type="text" id="myZip" style="width: 400px;" placeholder="20006"><br>
+        
+        <input type="submit" id="myBtn" value="Search Now!">
+        <button onClick="window.location.reload();">New Search</button>
+    </div>
     <script>
         // This sets up what is needed for the API
         var submit = document.getElementById("myBtn")
-        var myInput = document.getElementById("myTxt")
+        var inputAddress1 = document.getElementById("myAddress1")
+        var inputAddress2 = document.getElementById("myAddress2")
+        var inputCity = document.getElementById("myCity")
+        var inputState = document.getElementById("myState")
+        var inputZip = document.getElementById("myZip")
+        
+        var str = document.getElementById("myAddress1").value
         window.latGlobal;
         submit.addEventListener("click", () => {
            geocodio();
@@ -91,20 +166,39 @@
         
         // This is the API call itself
         function geocodio() {
+            var streetAddress2 = ""
+            if(document.getElementById("myAddress2").value != "") {
+                streetAddress2 = ", " + inputAddress2.value 
+            }
+            else {
+                streetAddress2 = ""
+            }
             
+            console.log(streetAddress2)
+            
+            var fullUserAddress = document.getElementById("myAddress1").value + streetAddress2 + ', ' + document.getElementById("myCity").value + ', ' + document.getElementById("myState").value + ', ' + document.getElementById("myZip").value
+            
+            console.log(fullUserAddress)
             //If the box is blank, then the user is prompted to add more
-            if(myInput.value.length == 0) {
-                alert("Please input a valid address")
+            if(document.getElementById("myAddress1").value.length == 0) {
+                alert("Please input a valid street address.")
+            }
+            else if(document.getElementById("myCity").value.length == 0) {
+                alert("Please input a city.")
+            }
+            else if(document.getElementById("myCity").value.length < 2) {
+                alert("Please input a state.")
+            }
+            else if(document.getElementById("myZip").value.length < 5) {
+                alert("Please input a zip code.")
             }
             //If the box isn't empty, execute the API call
             else {
-                jQuery.get('https://api.geocod.io/v1.7/geocode?q='+ encodeURIComponent(myInput.value) +'&api_key=' + encodeURIComponent([YOUR_API_KEY]) + '&fields=cd,', function(response) {  
+                jQuery.get('https://api.geocod.io/v1.7/geocode?q='+ encodeURIComponent(fullUserAddress) +'&api_key=' + encodeURIComponent('66fd6dd20f6c63c3a00f6b3ddac62dac3a32663') + '&fields=cd,stateleg,', function(response) {  
                         console.log(response.results)
                         // This reveals the table holding the API data.    
                         document.getElementById("apiBody").style.display = "block";
                         
-                        var lat = response.results[0].location.lat;
-        
                         // Base paths to the representative and senators     
                         var apiCongPath0 = response.results[0].fields.congressional_districts[0].current_legislators[0];
                         var apiCongPath1 = response.results[0].fields.congressional_districts[0].current_legislators[1];
@@ -145,10 +239,17 @@
                         var state = response.results[0].address_components.state;
                         var cong_number = response.results[0].fields.congressional_districts[0].congress_number;
                         var district = response.results[0].fields.congressional_districts[0].district_number;
+                        var userCounty = response.results[0].address_components.county
+                        var stateHouseCongressDistrict = response.results[0].fields.state_legislative_districts.house[0].name
+                        var stateSenateCongressDistrict = response.results[0].fields.state_legislative_districts.senate[0].name
                         
-                        // Congrssional district information.
+                        // Congrssional district information
+                        document.getElementById("full-address").innerHTML = userAddress;
                         document.getElementById("congressional-number").innerHTML = cong_number;
                         document.getElementById("congressional-district").innerHTML = state + district;
+                        document.getElementById("countyName").innerHTML = userCounty;
+                        document.getElementById("stateHouseDistrict").innerHTML = stateHouseCongressDistrict;
+                        document.getElementById("stateSenateDistrict").innerHTML = stateSenateCongressDistrict;
                         
                         try{
                             var repFacebook = apiCongPath0.social.facebook
@@ -159,9 +260,23 @@
                             document.getElementById("repFB").href= "https://www.facebook.com/" + repFacebook;
                             document.getElementById("repTW").href= "https://www.twitter.com/" + repTwitter;
                             document.getElementById("repYT").href= "https://www.youtube.com/" + repYouTube;
+                            document.getElementById("repFBId").innerHTML = "  " + repFacebook;  
+                            document.getElementById("repTWId").innerHTML = " @" + repTwitter;  
+                            document.getElementById("repYTId").innerHTML = "  " + repYouTube;  
                         }
                         catch(error) {
                             console.log("Rep Social Error")
+                        } 
+                        finally {
+                            if (repFacebook == null) {
+                                document.getElementById("repFBId").innerHTML = "  No Facebook Profile"
+                            }
+                            if (repTwitter == null) {
+                                document.getElementById("repTWId").innerHTML = "  No Twitter Profile"
+                            }
+                            if (repYouTube == null) {
+                                document.getElementById("repYTId").innerHTML = "  No YouTube Profile"
+                            }
                         }
                         try{
                             var sen1Facebook = apiCongPath1.social.facebook
@@ -172,9 +287,23 @@
                             document.getElementById("senator1Facebook").href= "https://www.facebook.com/" + sen1Facebook;
                             document.getElementById("senator1Twitter").href= "https://www.twitter.com/" + sen1Twitter;
                             document.getElementById("senator1YouTube").href = "https://www.youtube.com/" + sen1YouTube;    
+                            document.getElementById("senator1FacebookId").innerHTML = "  " + sen1Facebook;  
+                            document.getElementById("senator1TwitterId").innerHTML = " @" + sen1Twitter;  
+                            document.getElementById("senator1YouTubeId").innerHTML = "  " + sen1YouTube;  
                         }
                         catch(error){
                             console.log("Sen1 Social Error")
+                        }
+                        finally {
+                            if (sen1Facebook == null) {
+                                document.getElementById("senator1FacebookId").innerHTML = "  No Facebook Profile"
+                            }
+                            if (sen1Twitter == null) {
+                                document.getElementById("senator1TwitterId").innerHTML = "  No Twitter Profile"
+                            }
+                            if (sen1YouTube == null) {
+                                document.getElementById("senator1YouTubeId").innerHTML = "  No YouTube Profile"
+                            }
                         }
                         try{
                             var sen2Facebook = apiCongPath2.social.facebook
@@ -185,9 +314,23 @@
                             document.getElementById("senator2Facebook").href= "https://www.facebook.com/" + sen2Facebook;
                             document.getElementById("senator2Twitter").href= "https://www.twitter.com/" + sen2Twitter;
                             document.getElementById("senator2YouTube").href= "https://www.youtube.com/" + sen2YouTube;
+                            document.getElementById("senator2FacebookId").innerHTML = " " + sen2Facebook;  
+                            document.getElementById("senator2TwitterId").innerHTML = " @" + sen2Twitter;  
+                            document.getElementById("senator2YouTubeId").innerHTML = " " + sen2YouTube;  
                             }
                         catch(error){
                             console.log("Sen2 Social Error")
+                        }
+                        finally {
+                            if (sen2Facebook == null) {
+                                document.getElementById("senator2FacebookId").innerHTML = "  No Facebook Profile"
+                            }
+                            if (sen2Twitter == null) {
+                                document.getElementById("senator2TwitterId").innerHTML = "  No Twitter Profile"
+                            }
+                            if (sen2YouTube == null) {
+                                document.getElementById("senator2YouTubeId").innerHTML = "  No YouTube Profile"
+                            }
                         }
                     }    
                 );
@@ -199,16 +342,26 @@
        Code to run Google API
        */
         function loadClient() {
-        gapi.client.setApiKey([YOUR_API_KEY]);
+        gapi.client.setApiKey("AIzaSyBNQm_8Lb1oVtvakuhTWznLg-hQBIcCELk");
         return gapi.client.load("https://civicinfo.googleapis.com/$discovery/rest?version=v2")
             .then(function() { console.log("GAPI client loaded for API"); },
                   function(err) { console.error("Error loading GAPI client for API", err); });
       }
       // Make sure the client is loaded before calling this method.
       function execute() {
+          
+          if(document.getElementById("myAddress2").value != "") {
+                streetAddress2 = ", " + inputAddress2.value 
+            }
+            else {
+                streetAddress2 = ""
+            }
+            
+          var fullUserAddress = document.getElementById("myAddress1").value + streetAddress2 + ', ' + document.getElementById("myCity").value + ', ' + document.getElementById("myState").value + ', ' + document.getElementById("myZip").value
+          
         document.getElementById("apiBody").style.display = "block"
         return gapi.client.civicinfo.representatives.representativeInfoByAddress({
-          "address": myInput.value,
+          "address": fullUserAddress,
           "includeOffices": true,
           "levels": [
             "country",  
@@ -222,34 +375,53 @@
             .then(function(response) {
                 console.log(response.result)
                 var addressPath = response.result.normalizedInput
-                var userAddress = addressPath.line1 + ", " + addressPath.city + ", " + addressPath.state + " " + addressPath.zip
-                document.getElementById("full-address").innerHTML = userAddress;
-                // Senator 1's information
+                var userAddress = fullUserAddress
+
+                // US Senator 1's information
                 try {
-                    var sen1Path = response.result.officials[0] ||"No Info Available";
+                    var sen1Path = response.result.officials[0];
                     var sen1Name = "Sen. " + sen1Path.name;
                     var sen1Party = sen1Path.party.split(" ")[0];
                     var sen1PhoneNumber = sen1Path.phones[0];
-                    var sen1AddressPath = response.result.officials[0].address[0];
-                    var sen1line1 = sen1AddressPath.line1 || ""
-                    var sen1line2 = sen1AddressPath.line2 || ""
-                    var sen1FullAddress = sen1line1 + " " + sen1line2 + ", " + sen1AddressPath.city + " " + sen1AddressPath.state + ", " + sen1AddressPath.zip;
                     var sen1GovWebsite = sen1Path.urls[0];
+                    
                     //Table for the first Senator
                     document.getElementById("senFullName1").innerHTML = sen1Name;
                     document.getElementById("senParty1").innerHTML = sen1Party;
-                    document.getElementById("senAddress1").innerHTML = sen1FullAddress;
                     document.getElementById("senPhoneNumber1").innerHTML = sen1PhoneNumber;
                     document.getElementById("senWebsite1").innerHTML = sen1GovWebsite;
                     document.getElementById("senatorWebsite1").href = sen1GovWebsite;
+                    
+                    // US Senator 1's Address Information, if it exists
+                    try {
+                        var sen1AddressPath = response.result.officials[0].address[0] || ""
+                        
+                        var sen1line1 = sen1AddressPath.line1 || "";
+                        var sen1line2 = sen1AddressPath.line2 || "";
+                        var sen1City = sen1AddressPath.city || "";
+                        var sen1State = sen1AddressPath.state || "";
+                        var sen1Zip = sen1AddressPath.zip || "";
+                        
+                        var sen1FullAddress = (sen1line1 + " " + sen1line2 + ", " + sen1City + " " + sen1State + ", " + sen1Zip) || "";
+                        document.getElementById("senAddress1").innerHTML = sen1FullAddress;
+                    }
+                    catch {
+                        console.log("Sen1 Address Missing")
+                    }
+                    finally {
+                        if(sen1AddressPath = undefined) {
+                            document.getElementById("senAddress1").innerHTML = "No Info Available";
+                        };
+                    };
                 }
                 catch(error){
                     console.log("Sen1 Info Error")
+                    console.log(sen1line1)
                 }
                 finally {
                     if (sen1Path == "No Info Available") {
                         var sen1Path = response.result.officials[2] || "No Info Available";
-                        var sen1Name = "";
+                        var sen1Name = "Sen. " + sen1Path.name || "";
                         var sen1Party = "";
                         var sen1PhoneNumber = "";
                         var sen1AddressPath = "";
@@ -269,26 +441,43 @@
                     };
                 }
                 
-                // Senator 2's address path
+                // US Senator 2's address path
                 try{
                     var sen2Path = response.result.officials[1] || "No Info Available";
                     var sen2Name = "Sen. " + sen2Path.name
                     var sen2Party = sen2Path.party.split(" ")[0]
                     var sen2PhoneNumber = sen2Path.phones[0]
-                    var sen2AddressPath = response.result.officials[1].address[0]
-                    var sen2line1 = sen2AddressPath.line1 || ""
-                    var sen2line2 = sen2AddressPath.line2 || ""
-                    var sen2FullAddress = sen2line1 + " " + sen2line2 + ", " + sen2AddressPath.city + " " + sen2AddressPath.state + ", " + sen2AddressPath.zip
                     var sen2GovWebsite = sen2Path.urls[0]
                     
                     //Table for the second Senator
                     document.getElementById("senFullName2").innerHTML = sen2Name
                     document.getElementById("senParty2").innerHTML = sen2Party;
-                    document.getElementById("senAddress2").innerHTML = sen2FullAddress;
                     document.getElementById("senPhoneNumber2").innerHTML = sen2PhoneNumber;
                     
                     document.getElementById("senWebsite2").innerHTML = sen2GovWebsite;
                     document.getElementById("senatorWebsite2").href = sen2GovWebsite;
+                    
+                    // US Senator 2's Address Information, if it exists
+                    try {
+                        var sen2AddressPath = response.result.officials[1].address[0]
+                        
+                        var sen2line1 = sen2AddressPath.line1 || "";
+                        var sen2line2 = sen2AddressPath.line2 || "";
+                        var sen2City = sen2AddressPath.city || "";
+                        var sen2State = sen2AddressPath.state || "";
+                        var sen2Zip = sen2AddressPath.zip || "";
+                        
+                        var sen2FullAddress = (sen2line1 + " " + sen2line2 + ", " + sen2City + " " + sen2State + ", " + sen2Zip) || "";
+                        document.getElementById("senAddress2").innerHTML = sen2FullAddress;
+                    }
+                    catch {
+                        console.log("Sen2 Address Missing")
+                    }
+                    finally {
+                        if(sen2AddressPath = undefined) {
+                            document.getElementById("senAddress2").innerHTML = "No Info Available";
+                        };
+                    };
                 }
                 catch(error) {
                     console.log("Sen2 Info Error")
@@ -316,26 +505,42 @@
                     };
                 };
                 
-                // Representative's address path
+                // US Representative's address path
                 try {
                     var repPath = response.result.officials[2] || "No Info Available";
                     var repName = ("Rep. " + repPath.name);
                     var repParty = repPath.party.split(" ")[0];
                     var repPhoneNumber = repPath.phones[0];
-                    var repAddressPath = response.result.officials[2].address[0];
-                    var repline1 = repAddressPath.line1 || ""
-                    var repline2 = repAddressPath.line2 || ""
-                    var repFullAddress = repline1 + " " + repline2 + ", " + repAddressPath.city + " " + repAddressPath.state + ", " + repAddressPath.zip;
                     var repGovWebsite = repPath.urls[0];
-                    console.log(repName)
                     
                      // Table row for the House Representative
                     document.getElementById("houseFullName").innerHTML = repName;
                     document.getElementById("houseParty").innerHTML = repParty;
-                    document.getElementById("houseAddress").innerHTML = repFullAddress;
                     document.getElementById("housePhoneNumber").innerHTML = repPhoneNumber;
                     document.getElementById("repWebsite").innerHTML = repGovWebsite;
                     document.getElementById("houseWebsite").href = repGovWebsite;
+                    
+                    // US Representative's Address Information, if it exists
+                    try {
+                        var repAddressPath = response.result.officials[2].address[0]
+                        
+                        var repline1 = repAddressPath.line1 || "";
+                        var repline2 = repAddressPath.line2 || "";
+                        var repCity = repAddressPath.city || "";
+                        var repState = repAddressPath.state || "";
+                        var repZip = repAddressPath.zip || "";
+                        
+                        var repFullAddress = (repline1 + " " + repline2 + ", " + repCity + " " + repState + ", " + repZip) || "";
+                        document.getElementById("houseAddress").innerHTML = repFullAddress;
+                    }
+                    catch {
+                        console.log("Rep Address Missing")
+                    }
+                    finally {
+                        if(repAddressPath = undefined) {
+                            document.getElementById("houseAddress").innerHTML = "No Info Available";
+                        };
+                    };
                 }
                 catch(error) {
                     console.log("Rep Info Error")
@@ -355,6 +560,200 @@
                         document.getElementById("housePhoneNumber").innerHTML = repPhoneNumber;
                         document.getElementById("repWebsite").innerHTML = repGovWebsite;
                         document.getElementById("houseWebsite").href = repGovWebsite;
+                    };
+                };
+                
+                // State Senator's address path
+                try {
+                    var stateSenPath = response.result.officials[3] || "No Info Available";
+                    var stateSenName = ("Sen. " + stateSenPath.name);
+                    var stateSenParty = stateSenPath.party.split(" ")[0];
+                    var stateSenPhoneNumber = stateSenPath.phones[0];
+                    try {
+                        var stateSenAddressPath = response.result.officials[3].address[0]
+                        
+                        var stateSenline1 = stateSenAddressPath.line1;
+                        var stateSenline2 = stateSenAddressPath.line2;
+                        var stateSenCity = stateSenAddressPath.city;
+                        var stateSenState = stateSenAddressPath.state;
+                        var stateSenZip = stateSenAddressPath.zip;
+                        
+                        var stateSenFullAddress = stateSenline1 + " " + stateSenline2 + ", " + stateSenCity + " " + stateSenState + ", " + stateSenZip;
+                        document.getElementById("stateSenatorAddress").innerHTML = stateSenFullAddress;
+                    }
+                    catch {
+                        console.log("stateSen Address Missing")
+                    }
+                    finally {
+                        if(stateSenAddressPath = undefined) {
+                            document.getElementById("houseAddress").innerHTML = "No Info Available";
+                        };
+                    };
+                    
+                    //State Senator Website
+                    try {
+                        var stateSenGovWebsite = stateSenPath.urls[0];
+                        document.getElementById("stateSenatorWebsite").href = stateSenGovWebsite;
+                        document.getElementById("stateSenWebsite").innerHTML = stateSenGovWebsite;
+                    }
+                    catch {
+                        console.log("No State Sen Website")
+                    }
+                    finally{
+                        if(stateSenGovWebsite = undefined) {
+                            document.getElementById("stateSenWebsite").innerHTML = "No Info Available";
+                        };
+                    };
+                    
+                    console.log(stateSenName)
+                    
+                     // Table row for the State Senator
+                    document.getElementById("stateSenatorFullName").innerHTML = stateSenName;
+                    document.getElementById("stateSenatorParty").innerHTML = stateSenParty;
+                    document.getElementById("stateSenatorPhoneNumber").innerHTML = stateSenPhoneNumber;
+                    document.getElementById("stateSenPhotoName").innerHTML = stateSenName;
+                    
+                    // State Senator Photo
+                    try {
+                        var stateSenPhoto = stateSenPath.photoUrl
+                        document.getElementById("stateSenHeadshot").src = stateSenPhoto;
+                    }
+                    catch {
+                        console.log("State Sen Photo Missing")
+                    }
+                    finally {
+                        if(stateSenPhoto = undefined) {
+                            stateSenPhoto = ""
+                        };
+                    };
+                    
+                    // State Senate Email Path
+                    try {
+                        document.getElementById("stateSenatorEmail").href = "mailto:"+stateSenPath.emails[0];
+                        document.getElementById("stateSenatorEmailAddress").innerHTML = " " + stateSenPath.emails[0];
+                    }
+                    catch {
+                        console.log("State Senate Email Missing")
+                    }
+                    finally {
+                        if(stateSenPath.emails[0] = undefined) {
+                            document.getElementById("stateSenatorEmailAddress").innerHTML = "No Info Available"
+                        };
+                    };
+                }
+                catch(error) {
+                    console.log("Rep Info Error")
+                }
+                finally {
+                    if (stateSenPath == "No Info Available") {
+                        var stateSenName = "";
+                        var stateSenParty = "";
+                        var stateSenPhoneNumber = "";
+                        var stateSenAddressPath = "";
+                        var stateSenFullAddress = "No Info Currently Available";
+                        var stateSenGovWebsite = "";
+                        
+                        document.getElementById("stateSenatorFullName").innerHTML = stateSenName;
+                        document.getElementById("stateSenatorParty").innerHTML = stateSenParty;
+                        document.getElementById("stateSenatorAddress").innerHTML = stateSenFullAddress;
+                        document.getElementById("stateSenatorPhoneNumber").innerHTML = stateSenPhoneNumber;
+                        document.getElementById("stateSenWebsite").innerHTML = stateSenGovWebsite;
+                        document.getElementById("stateSenatorWebsite").href = stateSenGovWebsite;
+                    }
+                }
+                
+                // State Representative's address path
+                try {
+                    var stateRepPath = response.result.officials[4] || "No Info Available";
+                    var stateRepName = ("Rep. " + stateRepPath.name);
+                    var stateRepParty = stateRepPath.party.split(" ")[0];
+                    var stateRepPhoneNumber = stateRepPath.phones[0];
+                    
+                    // State Representative's address, if it exists
+                    try {
+                        var stateRepAddressPath = stateRepPath.address[0];
+                        
+                        var stateRepline1 = stateRepAddressPath.line1 || ""
+                        var stateRepline2 = stateRepAddressPath.line2 || ""
+                        var stateRepFullAddress = stateRepline1 + " " + stateRepline2 + ", " + stateRepAddressPath.city + " " + stateRepAddressPath.state + ", " + stateRepAddressPath.zip;
+                            document.getElementById("stateHouseAddress").innerHTML = stateRepFullAddress;
+                    }
+                    catch {
+                        console.log("stateRep Address Missing")
+                    }
+                    finally {
+                        if(stateRepAddressPath = undefined) {
+                            document.getElementById("stateHouseAddress").innerHTML = stateRepFullAddress;
+                        };
+                    };
+                    
+                    // State Representative Website, if it exists
+                    try {
+                        var stateRepGovWebsite = stateRepPath.urls[0];
+                        document.getElementById("stateRepWebsite").innerHTML = stateRepGovWebsite;
+                        document.getElementById("stateHouseWebsite").href = stateRepGovWebsite;
+                    }
+                    catch {
+                        console.log("No state rep website")
+                    }
+                    finally {
+                        if(stateRepGovWebsite = undefined) {
+                            document.getElementById("stateRepWebsite").innerHTML = "No Info Available"
+                        }
+                    };
+                    console.log(stateRepName)
+                    
+                     // Table row for the House Representative
+                    document.getElementById("stateHouseFullName").innerHTML = stateRepName;
+                    document.getElementById("stateHouseParty").innerHTML = stateRepParty;
+                    document.getElementById("stateHousePhoneNumber").innerHTML = stateRepPhoneNumber;
+                    document.getElementById("stateRepPhotoName").innerHTML = stateRepName;
+                    
+                    // State Rep Photo
+                    try {
+                        var stateRepPhoto = stateRepPath.photoUrl
+                        document.getElementById("stateHouseHeadshot").src = stateRepPhoto;
+                    }
+                    catch {
+                        console.log("State Rep Photo Unavailable")
+                    }
+                    finally {
+                        console.log(stateRepPhoto);
+                    };
+                    
+                    try {
+                        var stateRepEmail = stateRepPath.emails[0]
+                        document.getElementById("stateRepEmail").href = "mailto:"+ stateRepEmail;
+                        document.getElementById("stateRepEmailAddress").innerHTML = " " + stateRepEmail;
+                    }
+                    catch {
+                        console.log("State Rep email missing")
+                    }
+                    finally {
+                        console.log(stateRepEmail)
+                        if(stateRepEmail = undefined) {
+                            document.getElementById("stateRepEmailAddress").innerHTML = "No Info Available";
+                        };
+                    };
+                }
+                catch(error) {
+                    console.log("Rep Info Error")
+                }
+                finally {
+                    if (repPath == "No Info Available") {
+                        var stateRepName = "";
+                        var stateRepParty = "";
+                        var stateRepPhoneNumber = "";
+                        var stateRepAddressPath = "";
+                        var stateRepFullAddress = "No Info Currently Available";
+                        var stateRepGovWebsite = "";
+                        
+                        document.getElementById("stateHouseFullName").innerHTML = stateRepName;
+                        document.getElementById("stateHouseParty").innerHTML = stateRepParty;
+                        document.getElementById("stateHouseAddress").innerHTML = stateRepFullAddress;
+                        document.getElementById("stateHousePhoneNumber").innerHTML = stateRepPhoneNumber;
+                        document.getElementById("stateRepWebsite").innerHTML = stateRepGovWebsite;
+                        document.getElementById("stateHouseWebsite").href = stateRepGovWebsite;
                     }
                 }
             },function(err) { console.error("Execute error", err);
@@ -362,77 +761,138 @@
       }
       gapi.load("client");
     </script>
-    <div class="apiBody" id="apiBody">
-        <div id="apiIntro">
-            <h3>Your Congressional Information:</h3>
-            <p style="font-weight: bold">Your Address: <span span style="font-weight: normal" id="full-address"></span></p>
-            <p style="font-weight: bold">Congressional Class Number: <span style="font-weight: normal" id="congressional-number"></span></p>
-            <p style="font-weight: bold">Congressional District: <span style="font-weight: normal" id="congressional-district"></span></p>
-        </div> 
-        <div class="apiTable" id="apiResults">
-            <table class="table table-striped">
-                <thead>
-                    <tr class="head">
-                        <th>Member</th>
-                        <th>Party</th>
-                        <th>Office Address</th>
-                        <th>Phone Number</th>
-                        <th>Website</th>
+    <div class="print-container">
+        <div class="apiBody" id="apiBody">
+            <div id="apiIntro">
+                <h3>Your Federal Congressional Information:</h3>
+                <p style="font-weight: bold">Your Address: <span span style="font-weight: normal" id="full-address"></span></p>
+                <p style="font-weight: bold">Congressional Class Number: <span style="font-weight: normal" id="congressional-number"></span></p>
+                <p style="font-weight: bold">Congressional District: <span style="font-weight: normal" id="congressional-district"></span></p>
+            </div> 
+            <div id="apiResults" class="apiTable">
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="head">
+                            <th>Member</th>
+                            <th>Party</th>
+                            <th>Office Address</th>
+                            <th>Phone Number</th>
+                            <th>Website</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="member-row">
+                            <td ><span id="houseFullName"></span></td>
+                            <td><span id="houseParty"></span></td>
+                            <td><span id="houseAddress"></span></td>
+                            <td><span id="housePhoneNumber"></span></td>
+                            <td><a id="houseWebsite"><span id="repWebsite"></span></a></td>
+                        </tr>
+                        <tr class="member-row">
+                            <td ><span id="senFullName1"></span></td>
+                            <td><span id="senParty1"></span></td>
+                            <td><span id="senAddress1"></span></td>
+                            <td><span id="senPhoneNumber1"></span></td>
+                            <td><a id="senatorWebsite1"><span id="senWebsite1"></span></a></td>
+                        </tr>
+                        <tr class="member-row" style="height:auto">
+                            <td ><span id="senFullName2"></span></td>
+                            <td><span id="senParty2"></span></td>
+                            <td><span id="senAddress2"></span></td>
+                            <td><span id="senPhoneNumber2"></span></td>
+                            <td><a id="senatorWebsite2"><span id="senWebsite2"></span></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table id="memberPhotos" class="member-table">
+                    <tr class="photo-names">
+                        <td><span id="sen1PhotoName" style="font-weight: normal; font-size: 125%"></span></td>
+                        <td><span id="sen2PhotoName" style="font-weight: normal; font-size: 125%"></span></td>
+                        <td><span id="repPhotoName" style="font-weight: normal; font-size: 125%"></span></td>
                     </tr>
-                </thead>
-                <tbody>
-                    <tr class="member-row">
-                        <td ><span id="houseFullName"></span></td>
-                        <td><span id="houseParty"></span></td>
-                        <td><span id="houseAddress"></span></td>
-                        <td><span id="housePhoneNumber"></span></td>
-                        <td><a id="houseWebsite"><span id="repWebsite"></span></a></td>
+                    <tr class="member-photos">
+                        <td><img class="centerImage" id="sen1Headshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
+                        <td><img class="centerImage" id="sen2Headshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
+                        <td><img class="centerImage" id="repHeadshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
                     </tr>
-                    <tr class="member-row">
-                        <td ><span id="senFullName1"></span></td>
-                        <td><span id="senParty1"></span></td>
-                        <td><span id="senAddress1"></span></td>
-                        <td><span id="senPhoneNumber1"></span></td>
-                        <td><a id="senatorWebsite1"><span id="senWebsite1"></span></a></td>
+                    <tr class="member-social-media" id="popup">
+                        <td>
+                            <a class="fa fa-facebook" id="senator1Facebook" style="color:white;"></a><span id="senator1FacebookId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-twitter" id="senator1Twitter" style="color:white;"></a><span id="senator1TwitterId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-youtube" id="senator1YouTube" style="color:white;"></a><span id="senator1YouTubeId" style="font-weight: 500; font-size: 75%"></span>
+                        </td>
+                        <td>
+                            <a class="fa fa-facebook" id="senator2Facebook" style="color:white;"></a><span id="senator2FacebookId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-twitter" id="senator2Twitter" style="color:white;"></a><span id="senator2TwitterId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-youtube" id="senator2YouTube" style="color:white;"></a><span id="senator2YouTubeId" style="font-weight: 500; font-size: 75%"></span>
+                        </td>
+                        <td>
+                            <a class="fa fa-facebook" id="repFB" style="color:white;"></a><span id="repFBId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-twitter" id="repTW" style="color:white;"></a><span id="repTWId" style="font-weight: 500; font-size: 75%"></span><br>
+                            <a class="fa fa-youtube" id="repYT" style="color:white;"></a><span id="repYTId" style="font-weight: 500; font-size: 75%"></span>
+                        </td>
                     </tr>
-                    <tr class="member-row" style="height:auto">
-                        <td ><span id="senFullName2"></span></td>
-                        <td><span id="senParty2"></span></td>
-                        <td><span id="senAddress2"></span></td>
-                        <td><span id="senPhoneNumber2"></span></td>
-                        <td><a id="senatorWebsite2"><span id="senWebsite2"></span></a></td>
+                </table>
+            </div>
+            <div id="stateApiIntro" class="page-break-before">
+                <div class="apro-logo" style="height:0%">
+                    <img src="https://www.rtohq.org/wp-content/uploads/2016/04/Leg_Conf_2017_2.png" alt="APRO Legislative Conference Logo">
+                </div>
+                <h3>Your State Congressional Information:</h3>
+                <p style="font-weight: bold">County: <span style="font-weight: normal" id="countyName"></span></p>
+                <p style="font-weight: bold">Senate District: <span style="font-weight: normal" id="stateSenateDistrict"></span></p>
+                <p style="font-weight: bold">House District: <span span style="font-weight: normal" id="stateHouseDistrict"></span></p>
+            </div>
+            <div id="stateApiResults" class="apiTable">
+                <table class="table table-striped">
+                    <thead>
+                        <tr class="head">
+                            <th>Member</th>
+                            <th>Party</th>
+                            <th>Office Address</th>
+                            <th>Phone Number</th>
+                            <th>Website</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="member-row">
+                            <td ><span id="stateSenatorFullName"></span></td>
+                            <td><span id="stateSenatorParty"></span></td>
+                            <td><span id="stateSenatorAddress"></span></td>
+                            <td><span id="stateSenatorPhoneNumber"></span></td>
+                            <td><a id="stateSenatorWebsite" target="_blank"><span id="stateSenWebsite"></span></a></td>
+                        </tr>
+                        <tr class="member-row">
+                            <td ><span id="stateHouseFullName"></span></td>
+                            <td><span id="stateHouseParty"></span></td>
+                            <td><span id="stateHouseAddress"></span></td>
+                            <td><span id="stateHousePhoneNumber"></span></td>
+                            <td><a id="stateHouseWebsite" target="_blank"><span id="stateRepWebsite"></span></a></td>
+                        </tr>
+                    </tbody>
+                </table> 
+                <table id="stateMemberPhotos" class="member-table">
+                    <tr class="photo-names">
+                        <td><span id="stateSenPhotoName" style="font-weight: normal; font-size: 125%"></span></td>
+                        <td><span id="stateRepPhotoName" style="font-weight: normal; font-size: 125%"></span></td>
                     </tr>
-                </tbody>
-            </table>
-            <table id="memberPhotos" class="member-table">
-                <tr class="photo-names">
-                    <td><span id="sen1PhotoName"></span></td>
-                    <td><span id="sen2PhotoName"></span></td>
-                    <td><span id="repPhotoName"></span></td>
-                </tr>
-                <tr class="member-photos">
-                    <td><img class="centerImage" id="sen1Headshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
-                    <td><img class="centerImage" id="sen2Headshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
-                    <td><img class="centerImage" id="repHeadshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
-                </tr>
-                <tr class="member-social-media" id="popup">
-                    <td>
-                        <a class="fa fa-facebook" id="senator1Facebook" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-twitter" id="senator1Twitter" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-youtube" id="senator1YouTube" style="text-decoration:none;color:white;"></a>
-                    </td>
-                    <td>
-                        <a class="fa fa-facebook" id="senator2Facebook" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-twitter" id="senator2Twitter" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-youtube" id="senator2YouTube" style="text-decoration:none;color:white;"></a>
-                    </td>
-                    <td>
-                        <a class="fa fa-facebook" id="repFB" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-twitter" id="repTW" style="text-decoration:none;color:white;"></a>
-                        <a class="fa fa-youtube" id="repYT" style="text-decoration:none;color:white;"></a>
-                    </td>
-                </tr>
-            </table>
+                    <tr class="member-photos">
+                        <td><img class="centerImage" id="stateSenHeadshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
+                        <td><img class="centerImage" id="stateHouseHeadshot" style="width:240px;height:270px;" alt="Photo Unavailable"></td>
+                    </tr>
+                    <tr class="member-social-media" id="popup">
+                        <td>
+                            <a class="fa fa-envelope" id="stateSenatorEmail" style="color:white;"></a><span id="stateSenatorEmailAddress" style="font-weight: 500; font-size: 75%"></span>
+                        </td>
+                        <td>
+                            <a class="fa fa-envelope" id="stateRepEmail" style="color:white;"></a><span id="stateRepEmailAddress" style="font-weight: 500; font-size: 75%"></span>
+                        </td>
+                    </tr>
+                </table> 
+            </div>
+            <button onClick="window.print();">
+                Print or Save Your Results Here!
+            </button>
         </div>
-    </div>    
+    </div>  
 </body>
